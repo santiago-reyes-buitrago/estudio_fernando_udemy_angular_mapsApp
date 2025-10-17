@@ -1,1 +1,16 @@
-<p>fullscreen-map-page works!</p>
+<div #map></div>
+<section id="controls">
+  <section>
+    <h2 class="text-2xl font-bold text-black mb-2">Zoom <small
+      class="text-gray-500 font-normal">{{ this.mapboxService.zoom() | number:'1.0-0' }}</small></h2>
+    <input type="range" min="1" max="19" #slider [value]="this.mapboxService.zoom()" (input)="this.mapboxService.zoom.set(+slider.value)"
+           class="range range-secondary"/>
+  </section>
+  <section>
+    <h2>Coordenadas: </h2>
+    <pre class="text-sm ">
+      Latitud: {{this.mapboxService.coordinatesRead().lat | number: '1.4-4'}}
+      Longitud: {{this.mapboxService.coordinatesRead().lng | number: '1.4-4'}}
+    </pre>
+  </section>
+</section>
