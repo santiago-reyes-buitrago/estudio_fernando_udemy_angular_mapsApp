@@ -5,6 +5,11 @@ import {MarkerInterface} from '../interfaces/marker.interface';
 
 mapboxgl.accessToken = environment.mapboxKey
 
+export interface Marker {
+  id: string,
+  mapboxMarker: mapboxgl.Marker;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,8 +21,9 @@ export class MapService {
     lat: 40
   })
   coordinatesRead = computed<{ lng: number; lat: number }>(() => this.coordinates() as { lng: number; lat: number })
+  markers = signal<Marker[]>([])
 
-  async initMap(divElement:ElementRef) {
+  async initMap(divElement: ElementRef) {
     if (!divElement) return;
     await new Promise((resolve) => setTimeout(resolve, 100))
     const element = divElement?.nativeElement;
@@ -39,6 +45,15 @@ export class MapService {
       const center = map.getCenter();
       this.coordinates.set(center)
     })
+    map.on('click', (event) => {
+      const valueConfirm = confirm('Quiere crear un marcador?');
+      const color = '#xxxxxx'.replace(/x/g, (y) =>
+        ((Math.random() * 16) | 0).toString(16)
+      );
+      valueConfirm ?
+        this.addMarker(this.map()!, {color: color, lng: event.lngLat.lng, lat: event.lngLat.lat})
+        : null
+    })
   }
 
   mapControls(map: mapboxgl.Map) {
@@ -46,10 +61,26 @@ export class MapService {
     map.addControl(new mapboxgl.NavigationControl());
   }
 
-  addMarker(map:mapboxgl.Map, {color,draggable,lng,lat}: MarkerInterface) {
-    new mapboxgl.Marker({
+  addMarker(map: mapboxgl.Map, {color, draggable, lng, lat}: MarkerInterface) {
+    const mapboxMarker = new mapboxgl.Marker({
       color,
       draggable
-    }).setLngLat([lng,lat]).addTo(map)
+    }).setLngLat([lng, lat]).addTo(map)
+    this.markers.update((oldValue) => [{id: `${this.markers().length + 1}`, mapboxMarker: mapboxMarker}, ...oldValue])
+    console.log(this.markers())
+  }
+
+  flyToMarker(lngLat: LngLatLike) {
+    this.map()?.flyTo({
+      center: lngLat
+    })
+  }
+
+  deleteMarker(marker: Marker) {
+    const confirmDelete = confirm('Desea eliminar este marcador');
+    if (confirmDelete) {
+      marker?.mapboxMarker?.remove()
+      this.markers.update((Markers) => Markers.filter((item) => item.id !== marker.id))
+    }
   }
 }

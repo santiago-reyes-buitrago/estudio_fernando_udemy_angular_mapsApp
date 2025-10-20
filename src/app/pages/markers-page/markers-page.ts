@@ -1,10 +1,15 @@
 import {AfterViewInit, Component, effect, ElementRef, inject, viewChild} from '@angular/core';
-import {MapService} from '../../core/services/map.service';
+import {MapService, Marker} from '../../core/services/map.service';
+import {JsonPipe, NgClass} from '@angular/common';
+import {LngLatLike} from 'mapbox-gl';
 
 
 @Component({
   selector: 'app-markers-page',
-  imports: [],
+  imports: [
+    JsonPipe,
+    NgClass
+  ],
   templateUrl: './markers-page.html',
   styleUrl: './markers-page.css'
 })
@@ -24,5 +29,11 @@ export class MarkersPage implements AfterViewInit{
     this.mapboxService.map()?.setZoom(this.mapboxService.zoom())
   })
 
+  handleClick(lngLat: LngLatLike) {
+    this.mapboxService.flyToMarker(lngLat)
+  }
 
+  handleDbClick(marker: Marker) {
+    this.mapboxService.deleteMarker(marker);
+  }
 }
