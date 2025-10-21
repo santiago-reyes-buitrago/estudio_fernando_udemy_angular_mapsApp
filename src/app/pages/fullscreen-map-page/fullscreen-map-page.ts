@@ -13,7 +13,7 @@ import {MapService} from '../../core/services/map.service'; // or "const mapboxg
   styleUrl: './fullscreen-map-page.css'
 })
 export class FullscreenMapPage implements AfterViewInit {
-  mapboxService = inject(MapService);
+  mapboxService = new MapService();
   divElement = viewChild<ElementRef>('map');
 
   async ngAfterViewInit() {

@@ -1,5 +1,5 @@
 import {computed, ElementRef, Injectable, signal} from '@angular/core';
-import mapboxgl, {LngLatLike} from 'mapbox-gl';
+import mapboxgl, {LngLatLike, MapboxOptions, MapOptions} from 'mapbox-gl';
 import {environment} from '../../../environments/environment';
 import {MarkerInterface} from '../interfaces/marker.interface';
 
@@ -23,7 +23,7 @@ export class MapService {
   coordinatesRead = computed<{ lng: number; lat: number }>(() => this.coordinates() as { lng: number; lat: number })
   markers = signal<Marker[]>([])
 
-  async initMap(divElement: ElementRef) {
+  async initMap(divElement: ElementRef,options?: Partial<MapOptions>) {
     if (!divElement) return;
     await new Promise((resolve) => setTimeout(resolve, 100))
     const element = divElement?.nativeElement;
@@ -32,6 +32,7 @@ export class MapService {
       style: 'mapbox://styles/mapbox/streets-v12', // style URL
       center: this.coordinates(), // starting position [lng, lat]
       zoom: this.zoom(), // starting zoom
+      ...options
     });
     this.map.set(map);
   }
@@ -67,7 +68,6 @@ export class MapService {
       draggable
     }).setLngLat([lng, lat]).addTo(map)
     this.markers.update((oldValue) => [{id: `${this.markers().length + 1}`, mapboxMarker: mapboxMarker}, ...oldValue])
-    console.log(this.markers())
   }
 
   flyToMarker(lngLat: LngLatLike) {
